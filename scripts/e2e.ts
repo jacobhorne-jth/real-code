@@ -10,6 +10,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import type { ClientProblemState, RunResponseBody, SubmitResponseBody } from "../src/lib/api-types";
 import { readProblem } from "../src/server/problems/loader";
 
 const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -24,7 +25,7 @@ function check(ok: boolean, label: string) {
   if (!ok) failures++;
 }
 
-async function post(url: string, body: unknown): Promise<{ status: number; text: string; json: any }> {
+async function post<T = unknown>(url: string, body: unknown): Promise<{ status: number; text: string; json: T }> {
   const res = await fetch(BASE + url, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -37,7 +38,7 @@ async function post(url: string, body: unknown): Promise<{ status: number; text:
   } catch {
     // not JSON
   }
-  return { status: res.status, text, json };
+  return { status: res.status, text, json: json as T };
 }
 
 function leaksFutureStages(text: string, unlocked: number): string | null {
@@ -66,41 +67,41 @@ async function main() {
   check(leaksFutureStages(html, 1) === null && !html.includes(problem.stages[0].prompt.slice(0, 40)),
     "page HTML contains no stage content (it is fetched after load)");
 
-  const session = await post("/api/session", {});
+  const session = await post<{ sessionId: string }>("/api/session", {});
   check(session.status === 200, "session created");
   const sessionId: string = session.json.sessionId;
   const url = (action: string) => `/api/problems/${problemId}/${action}`;
 
-  const start = await post(url("start"), { sessionId });
+  const start = await post<{ state: ClientProblemState }>(url("start"), { sessionId });
   check(start.status === 200 && start.json.state.unlockedStage === 1, "starts at stage 1");
   check(leaksFutureStages(start.text, 1) === null, "start response has no locked-stage content");
 
-  const run = await post(url("run"), { sessionId, code: start.json.state.starterCode });
-  const failed = run.json.report.tests.find((t: any) => !t.passed);
-  check(run.status === 200 && failed && /operation #\d+/.test(failed.message ?? ""),
+  const run = await post<RunResponseBody>(url("run"), { sessionId, code: start.json.state.starterCode });
+  const failed = run.json.report.tests.find((t) => !t.passed);
+  check(run.status === 200 && failed !== undefined && /operation #\d+/.test(failed.message ?? ""),
     "Run reports which operation failed for the starter code");
 
   for (const stage of problem.stages) {
     const n = stage.number;
     const code = solution(n);
 
-    const runRes = await post(url("run"), { sessionId, code });
+    const runRes = await post<RunResponseBody>(url("run"), { sessionId, code });
     check(runRes.json.report.passed === runRes.json.report.total,
       `stage ${n}: Run passes ${runRes.json.report.passed}/${runRes.json.report.total} examples`);
 
     if (n >= 2) {
-      const broken = await post(url("submit"), { sessionId, code: breakStageOne(code) });
-      const s1 = broken.json.report.stages.find((s: any) => s.stage === 1);
+      const broken = await post<SubmitResponseBody>(url("submit"), { sessionId, code: breakStageOne(code) });
+      const s1 = broken.json.report.stages.find((s) => s.stage === 1);
       check(
-        broken.json.report.passed === false && broken.json.report.regressions.includes(1) && s1.regression,
+        broken.json.report.passed === false && broken.json.report.regressions.includes(1) && Boolean(s1?.regression),
         `stage ${n}: breaking stage-1 delete() is caught → "${s1?.message}"`,
       );
       check(broken.json.unlocked === null, `stage ${n}: a failed submit unlocks nothing`);
       check(!/operation #/.test(broken.text), `stage ${n}: hidden-test failures show counts only`);
     }
 
-    const submit = await post(url("submit"), { sessionId, code });
-    const lines = submit.json.report.stages.map((s: any) => s.message).join(" · ");
+    const submit = await post<SubmitResponseBody>(url("submit"), { sessionId, code });
+    const lines = submit.json.report.stages.map((s) => s.message).join(" · ");
     check(submit.json.report.passed === true, `stage ${n}: Submit passes → ${lines}`);
     const unlocked = submit.json.state.unlockedStage;
     if (n < problem.stages.length) {
@@ -109,7 +110,7 @@ async function main() {
     } else {
       check(submit.json.finished === true, "final stage: problem finished");
       const stats = submit.json.state.stats;
-      check(Boolean(stats) && stats.totalTimeMs >= 0, `finish stats: ${JSON.stringify(stats)}`);
+      check(stats !== null && stats.totalTimeMs >= 0, `finish stats: ${JSON.stringify(stats)}`);
     }
   }
 

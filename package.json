@@ -11,7 +11,8 @@
     "test": "vitest run --passWithNoTests",
     "validate": "tsx scripts/validate.ts",
     "db:generate": "drizzle-kit generate --config drizzle.sqlite.config.ts && drizzle-kit generate --config drizzle.pg.config.ts",
-    "db:migrate": "tsx scripts/migrate.ts"
+    "db:migrate": "tsx scripts/migrate.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

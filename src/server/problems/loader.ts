@@ -66,7 +66,7 @@ const PROBLEM_ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
 export function problemBankDir(): string {
   return process.env.PROBLEM_BANK_DIR
     ? path.resolve(process.env.PROBLEM_BANK_DIR)
-    : path.join(process.cwd(), "problem-bank");
+    : path.join(/*turbopackIgnore: true*/ process.cwd(), "problem-bank");
 }
 
 export function isValidProblemId(id: string): boolean {

@@ -21,7 +21,7 @@ export interface Database {
 const MIGRATIONS_DIR = path.join(process.cwd(), "drizzle");
 
 export function sqlitePath(): string {
-  return path.resolve(process.env.SQLITE_PATH ?? path.join(process.cwd(), ".data", "realcode.db"));
+  return path.resolve(/*turbopackIgnore: true*/ process.env.SQLITE_PATH ?? path.join(process.cwd(), ".data", "realcode.db"));
 }
 
 async function openSqlite(): Promise<Database> {

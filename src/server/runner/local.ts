@@ -137,7 +137,7 @@ export class LocalRunner implements CodeRunner {
     const budgetMs = overallBudgetMs(request);
     return new Promise<RunResponse>((resolve, reject) => {
       // Only pass what Python needs: never leak the server's secrets.
-      const child = spawn(command, args, {
+      const child = spawn(/*turbopackIgnore: true*/ command, args, {
         cwd: workdir,
         detached: true,
         stdio: ["pipe", "pipe", "pipe"],

@@ -1,21 +1,13 @@
 import { gradeTests, pyRepr, type OutcomeKind, type TestOutcome } from "./grading";
 import type { Problem, Stage, TestCase } from "./problems/loader";
 import type { CodeRunner } from "./runner/types";
+import type { PublicTestReport, StageSubmitReport } from "../lib/api-types";
+
+export type { PublicTestReport, StageSubmitReport };
 
 export const MAX_CODE_BYTES = 64 * 1024;
 
-/** Detailed result for a visible example test. Safe to send to the browser. */
-export interface PublicTestReport {
-  name: string;
-  passed: boolean;
-  kind: OutcomeKind;
-  message: string | null;
-  expected: string | null;
-  actual: string | null;
-  stdout: string;
-  elapsedMs: number;
-}
-
+/** Detailed results for the visible example tests. Safe to send to the browser. */
 export interface RunReport {
   stage: number;
   passed: number;
@@ -24,20 +16,7 @@ export interface RunReport {
   tests: PublicTestReport[];
 }
 
-/** Counts-only result for one stage's hidden tests. Never contains inputs. */
-export interface StageSubmitReport {
-  stage: number;
-  passed: number;
-  total: number;
-  allPassed: boolean;
-  /** True when this is an earlier stage that now fails. */
-  regression: boolean;
-  wrongAnswers: number;
-  errors: number;
-  timeouts: number;
-  message: string;
-}
-
+/** Counts-only results for hidden tests. Never contains test inputs. */
 export interface SubmitReport {
   stage: number;
   /** Current stage and every earlier stage passed. */

@@ -1,0 +1,25 @@
+[
+  {
+    "name": "backup and restore keep remaining TTL",
+    "ops": [
+      {"op": "set_at_with_ttl", "args": ["A", "B", "C", 1, 10], "expect": null},
+      {"op": "backup", "args": [3], "expect": 1},
+      {"op": "set_at", "args": ["A", "D", "E", 4], "expect": null},
+      {"op": "backup", "args": [5], "expect": 1},
+      {"op": "delete_at", "args": ["A", "B", 8], "expect": true},
+      {"op": "backup", "args": [9], "expect": 1},
+      {"op": "restore", "args": [10, 7], "expect": null},
+      {"op": "scan_at", "args": ["A", 15], "expect": ["B(C)", "D(E)"]},
+      {"op": "scan_at", "args": ["A", 16], "expect": ["D(E)"]}
+    ]
+  },
+  {
+    "name": "backup counts non-empty records",
+    "ops": [
+      {"op": "set_at", "args": ["A", "x", "1", 1], "expect": null},
+      {"op": "set_at_with_ttl", "args": ["B", "y", "2", 2, 3], "expect": null},
+      {"op": "backup", "args": [3], "expect": 2},
+      {"op": "backup", "args": [5], "expect": 1}
+    ]
+  }
+]

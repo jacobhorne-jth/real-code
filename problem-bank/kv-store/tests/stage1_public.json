@@ -1,0 +1,23 @@
+[
+  {
+    "name": "set, get and delete",
+    "ops": [
+      {"op": "set", "args": ["A", "B", "E"], "expect": null},
+      {"op": "set", "args": ["A", "C", "F"], "expect": null},
+      {"op": "get", "args": ["A", "B"], "expect": "E"},
+      {"op": "get", "args": ["A", "D"], "expect": null},
+      {"op": "delete", "args": ["A", "B"], "expect": true},
+      {"op": "delete", "args": ["A", "D"], "expect": false},
+      {"op": "get", "args": ["A", "B"], "expect": null}
+    ]
+  },
+  {
+    "name": "overwrite a field",
+    "ops": [
+      {"op": "set", "args": ["user1", "name", "ada"], "expect": null},
+      {"op": "set", "args": ["user1", "name", "grace"], "expect": null},
+      {"op": "get", "args": ["user1", "name"], "expect": "grace"},
+      {"op": "get", "args": ["user2", "name"], "expect": null}
+    ]
+  }
+]

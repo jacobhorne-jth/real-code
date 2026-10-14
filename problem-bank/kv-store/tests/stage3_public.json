@@ -1,0 +1,25 @@
+[
+  {
+    "name": "TTL is replaced on set",
+    "ops": [
+      {"op": "set_at_with_ttl", "args": ["A", "BC", "E", 1, 9], "expect": null},
+      {"op": "set_at_with_ttl", "args": ["A", "BC", "E", 5, 10], "expect": null},
+      {"op": "set_at", "args": ["A", "BD", "F", 5], "expect": null},
+      {"op": "scan_by_prefix_at", "args": ["A", "B", 14], "expect": ["BC(E)", "BD(F)"]},
+      {"op": "scan_by_prefix_at", "args": ["A", "B", 15], "expect": ["BD(F)"]}
+    ]
+  },
+  {
+    "name": "expired fields disappear",
+    "ops": [
+      {"op": "set_at_with_ttl", "args": ["A", "B", "C", 1, 10], "expect": null},
+      {"op": "set_at", "args": ["A", "D", "E", 2], "expect": null},
+      {"op": "get_at", "args": ["A", "B", 10], "expect": "C"},
+      {"op": "get_at", "args": ["A", "B", 11], "expect": null},
+      {"op": "scan_at", "args": ["A", 12], "expect": ["D(E)"]},
+      {"op": "delete_at", "args": ["A", "B", 13], "expect": false},
+      {"op": "delete_at", "args": ["A", "D", 14], "expect": true},
+      {"op": "get_at", "args": ["A", "D", 15], "expect": null}
+    ]
+  }
+]

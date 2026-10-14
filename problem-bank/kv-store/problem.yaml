@@ -1,0 +1,46 @@
+title: In-Memory Key-Value Store
+difficulty: Medium
+time_estimate_minutes: 90
+language: python
+class_name: InMemoryDB
+# Per-test time limit unless a test sets its own time_limit_ms.
+default_time_limit_ms: 2000
+
+stages:
+  - title: Basic records
+    methods:
+      - name: set
+        signature: "set(self, key: str, field: str, value: str) -> None"
+      - name: get
+        signature: "get(self, key: str, field: str) -> str | None"
+      - name: delete
+        signature: "delete(self, key: str, field: str) -> bool"
+
+  - title: Scanning fields
+    methods:
+      - name: scan
+        signature: "scan(self, key: str) -> list[str]"
+      - name: scan_by_prefix
+        signature: "scan_by_prefix(self, key: str, prefix: str) -> list[str]"
+
+  - title: Timestamps and TTL
+    methods:
+      - name: set_at
+        signature: "set_at(self, key: str, field: str, value: str, timestamp: int) -> None"
+      - name: set_at_with_ttl
+        signature: "set_at_with_ttl(self, key: str, field: str, value: str, timestamp: int, ttl: int) -> None"
+      - name: delete_at
+        signature: "delete_at(self, key: str, field: str, timestamp: int) -> bool"
+      - name: get_at
+        signature: "get_at(self, key: str, field: str, timestamp: int) -> str | None"
+      - name: scan_at
+        signature: "scan_at(self, key: str, timestamp: int) -> list[str]"
+      - name: scan_by_prefix_at
+        signature: "scan_by_prefix_at(self, key: str, prefix: str, timestamp: int) -> list[str]"
+
+  - title: Backup and restore
+    methods:
+      - name: backup
+        signature: "backup(self, timestamp: int) -> int"
+      - name: restore
+        signature: "restore(self, timestamp: int, timestamp_to_restore: int) -> None"

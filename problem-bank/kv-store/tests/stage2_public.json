@@ -1,0 +1,22 @@
+[
+  {
+    "name": "scan by prefix",
+    "ops": [
+      {"op": "set", "args": ["A", "BC", "E"], "expect": null},
+      {"op": "set", "args": ["A", "BD", "F"], "expect": null},
+      {"op": "set", "args": ["A", "C", "G"], "expect": null},
+      {"op": "scan_by_prefix", "args": ["A", "B"], "expect": ["BC(E)", "BD(F)"]},
+      {"op": "scan", "args": ["A"], "expect": ["BC(E)", "BD(F)", "C(G)"]},
+      {"op": "scan_by_prefix", "args": ["B", "B"], "expect": []}
+    ]
+  },
+  {
+    "name": "scan is sorted by field",
+    "ops": [
+      {"op": "set", "args": ["user", "zip", "94110"], "expect": null},
+      {"op": "set", "args": ["user", "age", "36"], "expect": null},
+      {"op": "set", "args": ["user", "city", "SF"], "expect": null},
+      {"op": "scan", "args": ["user"], "expect": ["age(36)", "city(SF)", "zip(94110)"]}
+    ]
+  }
+]
